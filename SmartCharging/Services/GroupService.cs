@@ -18,10 +18,10 @@ namespace SmartCharging.Services
 
         public async Task<Group> FetchGroupById(int groupId)
         {
-            var product = await _context.Groups
+            return await _context.Groups
                                   .Where(x => x.Id == groupId)
                                   .SingleOrDefaultAsync(); 
-            return product;
+            
         }
 
         public async Task<Group> AddGroup(Group group)
@@ -37,7 +37,7 @@ namespace SmartCharging.Services
              .FindAsync(id);
             if (updateGroup is not null)
             {
-                if (_commonService.IsExceedMaxCapacity(id, group.CapacityInAmps))
+                if (_commonService.IsMaxCapacityHigh(id, group.CapacityInAmps))
                 {
                     updateGroup.CapacityInAmps = group.CapacityInAmps;
                     updateGroup.Name = group.Name;
@@ -45,7 +45,7 @@ namespace SmartCharging.Services
                 }
                 else
                 {
-                    throw new ApplicationException("Group Capacity is lesser than total current in the connectors");
+                    throw new ApplicationException("total capacity should not be lesser than the total current avaialble in the connectors");
                 }
             }
             return updateGroup;

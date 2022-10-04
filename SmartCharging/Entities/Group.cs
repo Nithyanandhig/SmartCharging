@@ -41,7 +41,7 @@ namespace SmartCharging.Model
     public class Connector
     {
         [Required]
-        public int Id { get; set; }
+        public int ConnectorId { get; set; }
 
         [Required]
         public int StationId { get; set; }
