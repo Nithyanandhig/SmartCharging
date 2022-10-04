@@ -19,17 +19,17 @@ namespace SmartCharging
             connectors.Add(new Model.Connector { ConnectorId = 2, StationId = 1, MaxCurrentInAmps = 15 });
             connectors.Add(new Model.Connector { ConnectorId = 3, StationId = 1, MaxCurrentInAmps = 20 });
 
-            connectors.Add(new Model.Connector { ConnectorId = 6, StationId = 2, MaxCurrentInAmps = 10 });
-            connectors.Add(new Model.Connector { ConnectorId = 4, StationId = 2, MaxCurrentInAmps = 15 });
-            connectors.Add(new Model.Connector { ConnectorId = 5, StationId = 2, MaxCurrentInAmps = 20 });
+            connectors.Add(new Model.Connector { ConnectorId = 1, StationId = 2, MaxCurrentInAmps = 10 });
+            connectors.Add(new Model.Connector { ConnectorId = 2, StationId = 2, MaxCurrentInAmps = 15 });
+            connectors.Add(new Model.Connector { ConnectorId = 3, StationId = 2, MaxCurrentInAmps = 20 });
 
-            connectors.Add(new Model.Connector { ConnectorId = 7, StationId = 3, MaxCurrentInAmps = 15 });
-            connectors.Add(new Model.Connector { ConnectorId = 8, StationId = 3, MaxCurrentInAmps = 30 });
-            connectors.Add(new Model.Connector { ConnectorId = 9, StationId = 3, MaxCurrentInAmps = 25 });
+            connectors.Add(new Model.Connector { ConnectorId = 1, StationId = 3, MaxCurrentInAmps = 15 });
+            connectors.Add(new Model.Connector { ConnectorId = 2, StationId = 3, MaxCurrentInAmps = 30 });
+            connectors.Add(new Model.Connector { ConnectorId = 3, StationId = 3, MaxCurrentInAmps = 25 });
 
-            connectors.Add(new Model.Connector { ConnectorId = 10, StationId = 4, MaxCurrentInAmps = 12 });
-            connectors.Add(new Model.Connector { ConnectorId = 11, StationId = 4, MaxCurrentInAmps = 16 });
-            connectors.Add(new Model.Connector { ConnectorId = 12, StationId = 4, MaxCurrentInAmps = 21 });
+            connectors.Add(new Model.Connector { ConnectorId = 1, StationId = 4, MaxCurrentInAmps = 12 });
+            connectors.Add(new Model.Connector { ConnectorId = 2, StationId = 4, MaxCurrentInAmps = 16 });
+            connectors.Add(new Model.Connector { ConnectorId = 3, StationId = 4, MaxCurrentInAmps = 21 });
 
             var stations = new List<ChargingStation>();
             stations.Add(new Model.ChargingStation { Id = 1, GroupId = 1, Name = "CS1", Connectors = connectors.Where(a => a.StationId == 1).ToList() });

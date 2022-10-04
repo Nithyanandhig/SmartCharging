@@ -1,4 +1,5 @@
-﻿using SmartCharging.DBContext;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartCharging.DBContext;
 using SmartCharging.Interfaces;
 
 namespace SmartCharging.Services
@@ -31,11 +32,11 @@ namespace SmartCharging.Services
 
         private double GetExistingCurrentInAmps(int groupId)
         {
-            var stations = _context.Stations.Where(a => a.GroupId == groupId).ToArray();
+            var group = _context.Groups.Where(a => a.Id == groupId).Include(b => b.Stations).ThenInclude(c => c.Connectors).FirstOrDefault();
             double totalCurrent = 0;
-            foreach (var station in stations)
+            foreach (var station in group.Stations)
             {
-                double total = _context.Connectors.Where(a => a.StationId == station.Id).Sum(b => b.MaxCurrentInAmps);
+                double total = station.Connectors.Sum(b => b.MaxCurrentInAmps);
                 totalCurrent = totalCurrent + total;
             }
             return totalCurrent;

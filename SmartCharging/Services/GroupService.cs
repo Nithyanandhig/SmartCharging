@@ -20,6 +20,8 @@ namespace SmartCharging.Services
         {
             return await _context.Groups
                                   .Where(x => x.Id == groupId)
+                                  .Include(x=>x.Stations)
+                                  .ThenInclude(c=>c.Connectors)
                                   .SingleOrDefaultAsync(); 
             
         }
@@ -53,16 +55,10 @@ namespace SmartCharging.Services
 
         public async Task<Group> DeleteGroup(int groupId)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Where(a=>a.Id==groupId).Include(x => x.Stations)
+                                  .ThenInclude(c => c.Connectors).FirstOrDefaultAsync();
             if (group is not null)
             {
-                var stations = _context.Stations.Where(g => g.GroupId == groupId).ToArray();
-                foreach (var station in stations)
-                {
-                    var connectors = _context.Connectors.Where(g => g.StationId == station.Id).ToArray();
-                    _context.Connectors.RemoveRange(connectors);
-                }
-                _context.Stations.RemoveRange(stations);
                 _context.Groups.Remove(group);
                 await _context.SaveChangesAsync();
             }

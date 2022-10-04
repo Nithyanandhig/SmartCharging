@@ -26,13 +26,19 @@ namespace SmartCharging.Services
         }
         public async Task<ChargingStation> AddStation(ChargingStation station)
         {
-            if (!_context.Groups.Any(a => a.Id == station.GroupId))
+            var group = _context.Groups.Where(a => a.Id == station.GroupId).Include(b => b.Stations).FirstOrDefault();
+            if (group is null)
             {
                 throw new ApplicationException("Group does not Exists");
             }
-            if (_context.Stations.Any(a => a.Id == station.Id || a.Name == station.Name))
+            if (group.Stations.Any(a => a.Id == station.Id || a.Name == station.Name))
             {
                 throw new ApplicationException("Station Already Exists");
+            }
+            var connectors = station.Connectors.Where(a => a.StationId == station.Id).ToList();
+            if (connectors is null || (connectors is not null && (connectors.Count() < 1 || connectors.Count() > 5)))
+            {
+                throw new ApplicationException("Station Should have atleast one Connector and not more than 5");
             }
             _context.Stations.Add(station);
             await _context.SaveChangesAsync();
