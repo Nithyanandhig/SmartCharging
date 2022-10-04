@@ -31,7 +31,7 @@ namespace SmartCharging.Services
             {
                 throw new ApplicationException("Group does not Exists");
             }
-            if (group.Stations.Any(a => a.Id == station.Id || a.Name == station.Name))
+            if (_context.Stations.Any(a => a.Id == station.Id || a.Name == station.Name))
             {
                 throw new ApplicationException("Station Already Exists");
             }

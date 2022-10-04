@@ -20,11 +20,11 @@ namespace SmartCharging.Services
             return false;
         }
 
-        public bool IsTotalCurrentLessThanCapacity(int groupId,double newCurrent,int connectorId= 0)
+        public bool IsTotalCurrentLessThanCapacity(int groupId,double newCurrent,int stationId,int connectorId= 0)
         {
             var totalCapcity = _context.Groups.Where(a => a.Id == groupId).SingleOrDefault().CapacityInAmps;
             double existingTotalCurrent = GetExistingCurrentInAmps(groupId);
-            double totalCurrent = connectorId > 0 ? (existingTotalCurrent -  _context.Connectors.Find(connectorId).MaxCurrentInAmps + newCurrent) : (existingTotalCurrent + newCurrent);
+            double totalCurrent = connectorId > 0 ? (existingTotalCurrent -  _context.Connectors.Find(connectorId,stationId).MaxCurrentInAmps + newCurrent) : (existingTotalCurrent + newCurrent);
             if (totalCurrent <= totalCapcity)
                 return true;
             return false;

@@ -34,7 +34,7 @@ namespace SmartCharging.Services
             {
                 if (_context.Connectors.Where(a => a.StationId == connector.StationId).Count() < 5)
                 {
-                    if (_commonService.IsTotalCurrentLessThanCapacity(station.GroupId, connector.MaxCurrentInAmps))
+                    if (_commonService.IsTotalCurrentLessThanCapacity(station.GroupId, connector.MaxCurrentInAmps,station.Id))
                     {
                         _context.Connectors.Add(connector);
                         await _context.SaveChangesAsync();
@@ -59,9 +59,9 @@ namespace SmartCharging.Services
             var station = _context.Stations.FindAsync(connector.StationId).Result;
             if (station is null)
             {
-                throw new ApplicationException("Station Does not exists");
+                throw new ApplicationException("Station does not exists");
             }
-            if (modifiedConnector is not null && _commonService.IsTotalCurrentLessThanCapacity(station.GroupId,connector.MaxCurrentInAmps,id))
+            if (modifiedConnector is not null && _commonService.IsTotalCurrentLessThanCapacity(station.GroupId,connector.MaxCurrentInAmps,station.Id,id))
             {
                 modifiedConnector.MaxCurrentInAmps = connector.MaxCurrentInAmps;
                 await _context.SaveChangesAsync();
