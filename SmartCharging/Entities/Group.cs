@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace SmartCharging.Model
 {
@@ -17,8 +16,7 @@ namespace SmartCharging.Model
         [Range(1, double.MaxValue, ErrorMessage = "Capacity should be bigger than {1}")]
         public double CapacityInAmps { get; set; }
 
-        [NotMapped]
-        public List<ChargingStation> Stations { get; set; }
+        public virtual List<ChargingStation> Stations { get; set; }
     }
 
     public class ChargingStation
@@ -32,16 +30,15 @@ namespace SmartCharging.Model
         [Required]
         [MaxLength(50)]
         public string Name { get; set; }
-
-        [NotMapped]
-        public List<Connector> Connectors { get; set; }
+ 
+        public virtual List<Connector> Connectors { get; set; }
      
     }
 
     public class Connector
     {
         [Required]
-        public int Id { get; set; }
+        public int ConnectorId { get; set; }
 
         [Required]
         public int StationId { get; set; }

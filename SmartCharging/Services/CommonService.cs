@@ -13,23 +13,33 @@ namespace SmartCharging.Services
             _context = context;
         }
 
-        public bool IsExceedMaxCapacity(int groupId, double capacity=0)
+        public bool IsMaxCapacityHigh(int groupId, double maxCapacity)
         {
-            var stations = _context.Stations.Where(a => a.GroupId == groupId).ToArray();
-            double totalCurrent=0;
-            foreach (var station in stations)
-            {
-                double total = _context.Connectors.Where(a => a.StationId == station.Id).Sum(b => b.MaxCurrentInAmps);
-                totalCurrent = totalCurrent + total;
-            }
-            if(capacity <=0)
-            {
-                capacity = _context.Groups.Where(a => a.Id == groupId).SingleOrDefault().CapacityInAmps;
-            }
-            if (capacity >= totalCurrent)
+            if (maxCapacity >= GetExistingCurrentInAmps(groupId))
                 return true;
             return false;
+        }
 
+        public bool IsTotalCurrentLessThanCapacity(int groupId,double newCurrent,int stationId,int connectorId= 0)
+        {
+            var totalCapcity = _context.Groups.Where(a => a.Id == groupId).SingleOrDefault().CapacityInAmps;
+            double existingTotalCurrent = GetExistingCurrentInAmps(groupId);
+            double totalCurrent = connectorId > 0 ? (existingTotalCurrent -  _context.Connectors.Find(connectorId,stationId).MaxCurrentInAmps + newCurrent) : (existingTotalCurrent + newCurrent);
+            if (totalCurrent <= totalCapcity)
+                return true;
+            return false;
+        }
+
+        private double GetExistingCurrentInAmps(int groupId)
+        {
+            var group = _context.Groups.Where(a => a.Id == groupId).Include(b => b.Stations).ThenInclude(c => c.Connectors).FirstOrDefault();
+            double totalCurrent = 0;
+            foreach (var station in group.Stations)
+            {
+                double total = station.Connectors.Sum(b => b.MaxCurrentInAmps);
+                totalCurrent = totalCurrent + total;
+            }
+            return totalCurrent;
         }
     }
 }

@@ -2,6 +2,8 @@
 {
     public interface ICommonService
     {
-        bool IsExceedMaxCapacity(int groupId, double maxCapcity=0);
+        bool IsMaxCapacityHigh(int groupId, double maxCapacity);
+
+        bool IsTotalCurrentLessThanCapacity(int groupId, double newCurrent,int stationId, int connectorId = 0);
     }
 }

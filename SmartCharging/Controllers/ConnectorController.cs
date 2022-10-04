@@ -57,7 +57,7 @@ namespace SmartCharging.Controllers
         {
             try
             {
-                if (id <= 0 && id == connector.Id)
+                if (id <= 0 && id == connector.ConnectorId)
                     return BadRequest();
 
                 var status = await _connectorService.UpdateConnector(id, connector);

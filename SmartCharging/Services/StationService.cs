@@ -2,7 +2,6 @@
 using SmartCharging.DBContext;
 using SmartCharging.Interfaces;
 using SmartCharging.Model;
-using System.Text.RegularExpressions;
 
 namespace SmartCharging.Services
 {
@@ -18,19 +17,28 @@ namespace SmartCharging.Services
         {
             var stations = await _context.Stations
                                .Where(c => c.GroupId == groupId)
-                               .ToListAsync(); 
+                               .ToListAsync();
             return stations;
         }
         public async Task<ChargingStation> FetchStationById(int stationId)
         {
-            var stations = await _context.Stations.FindAsync(stationId);
-            return stations;
+            return await _context.Stations.FindAsync(stationId);
         }
         public async Task<ChargingStation> AddStation(ChargingStation station)
         {
-            if(hasStationAlready(station))
+            var group = _context.Groups.Where(a => a.Id == station.GroupId).Include(b => b.Stations).FirstOrDefault();
+            if (group is null)
+            {
+                throw new ApplicationException("Group does not Exists");
+            }
+            if (_context.Stations.Any(a => a.Id == station.Id || a.Name == station.Name))
             {
                 throw new ApplicationException("Station Already Exists");
+            }
+            var connectors = station.Connectors.Where(a => a.StationId == station.Id).ToList();
+            if (connectors is null || (connectors is not null && (connectors.Count() < 1 || connectors.Count() > 5)))
+            {
+                throw new ApplicationException("Station Should have atleast one Connector and not more than 5");
             }
             _context.Stations.Add(station);
             await _context.SaveChangesAsync();
@@ -38,9 +46,9 @@ namespace SmartCharging.Services
         }
         public async Task<ChargingStation> UpdateStation(int id, ChargingStation station)
         {
-            if (hasStationAlready(station))
+            if (!_context.Groups.Any(a => a.Id == station.GroupId))
             {
-                throw new ApplicationException("Station Already Exists");
+                throw new ApplicationException("Group does not Exists");
             }
             var updateStation = await _context.Stations
            .FindAsync(id);
@@ -62,11 +70,6 @@ namespace SmartCharging.Services
                 await _context.SaveChangesAsync();
             }
             return station;
-        }
-
-        private bool hasStationAlready(ChargingStation station)
-        {
-            return _context.Stations.Any(a => a.GroupId == station.GroupId && a.Name == station.Name);
         }
     }
 }

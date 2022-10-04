@@ -3,7 +3,6 @@ using SmartCharging;
 using SmartCharging.DBContext;
 using SmartCharging.Interfaces;
 using SmartCharging.Services;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +12,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ChargingContext>(opt => opt.UseInMemoryDatabase("Charging"));
 builder.Services.AddTransient<DataSeeder>();
+
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<IConnectorService, ConnectorService>();

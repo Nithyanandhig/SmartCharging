@@ -18,10 +18,9 @@ namespace SmartCharging.Services
 
         public async Task<List<Connector>> FetchAllConnectorsInStation(int stationId)
         {
-            var connectors = await _context.Connectors
+            return await _context.Connectors
                                   .Where(c => c.StationId == stationId)
                                   .ToListAsync(); ;
-            return connectors;
         }
 
         public async Task<Connector> AddConnector(Connector connector)
@@ -29,14 +28,25 @@ namespace SmartCharging.Services
             var station = _context.Stations.FindAsync(connector.StationId).Result;
             if (station is null)
             {
-                throw new ApplicationException("Station Does not exists");
+                throw new ApplicationException("Station does not exists");
             }
             else
             {
-                if (_commonService.IsExceedMaxCapacity(station.GroupId))
+                if (_context.Connectors.Where(a => a.StationId == connector.StationId).Count() < 5)
                 {
-                    _context.Connectors.Add(connector);
-                    await _context.SaveChangesAsync();
+                    if (_commonService.IsTotalCurrentLessThanCapacity(station.GroupId, connector.MaxCurrentInAmps,station.Id))
+                    {
+                        _context.Connectors.Add(connector);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        throw new ApplicationException("MaxCurrent exceeds the total capacity");
+                    }
+                }
+                else
+                {
+                    throw new ApplicationException("Cannot add counter more than 5");
                 }
             }
             return connector;
@@ -45,23 +55,27 @@ namespace SmartCharging.Services
         public async Task<Connector> UpdateConnector(int id, Connector connector)
         {
             var modifiedConnector = await _context.Connectors
-             .Where(x => x.Id == id && x.StationId == connector.StationId).FirstOrDefaultAsync();
+             .Where(x => x.ConnectorId == id && x.StationId == connector.StationId).FirstOrDefaultAsync();
             var station = _context.Stations.FindAsync(connector.StationId).Result;
             if (station is null)
             {
-                throw new ApplicationException("Station Does not exists");
+                throw new ApplicationException("Station does not exists");
             }
-            if (modifiedConnector is not null && _commonService.IsExceedMaxCapacity(station.GroupId))
+            if (modifiedConnector is not null && _commonService.IsTotalCurrentLessThanCapacity(station.GroupId,connector.MaxCurrentInAmps,station.Id,id))
             {
                 modifiedConnector.MaxCurrentInAmps = connector.MaxCurrentInAmps;
                 await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ApplicationException("MaxCurrent exceeds the total capacity");
             }
             return modifiedConnector;
         }
 
         public async Task<Connector> DeleteConnector(int connectorId,int stationId)
         {
-            var connector = await _context.Connectors.FirstOrDefaultAsync(a=> a.Id == connectorId && a.StationId == stationId);
+            var connector = await _context.Connectors.FirstOrDefaultAsync(a=> a.ConnectorId == connectorId && a.StationId == stationId);
             if (connector is not null)
             {
                 _context.Connectors.Remove(connector);

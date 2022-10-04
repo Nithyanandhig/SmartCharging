@@ -18,10 +18,12 @@ namespace SmartCharging.Services
 
         public async Task<Group> FetchGroupById(int groupId)
         {
-            var product = await _context.Groups
+            return await _context.Groups
                                   .Where(x => x.Id == groupId)
+                                  .Include(x=>x.Stations)
+                                  .ThenInclude(c=>c.Connectors)
                                   .SingleOrDefaultAsync(); 
-            return product;
+            
         }
 
         public async Task<Group> AddGroup(Group group)
@@ -37,7 +39,7 @@ namespace SmartCharging.Services
              .FindAsync(id);
             if (updateGroup is not null)
             {
-                if (_commonService.IsExceedMaxCapacity(id, group.CapacityInAmps))
+                if (_commonService.IsMaxCapacityHigh(id, group.CapacityInAmps))
                 {
                     updateGroup.CapacityInAmps = group.CapacityInAmps;
                     updateGroup.Name = group.Name;
@@ -45,7 +47,7 @@ namespace SmartCharging.Services
                 }
                 else
                 {
-                    throw new ApplicationException("Group Capacity is lesser than total current in the connectors");
+                    throw new ApplicationException("total capacity should not be lesser than the total current avaialble in the connectors");
                 }
             }
             return updateGroup;
@@ -53,16 +55,10 @@ namespace SmartCharging.Services
 
         public async Task<Group> DeleteGroup(int groupId)
         {
-            var group = await _context.Groups.FindAsync(groupId);
+            var group = await _context.Groups.Where(a=>a.Id==groupId).Include(x => x.Stations)
+                                  .ThenInclude(c => c.Connectors).FirstOrDefaultAsync();
             if (group is not null)
             {
-                var stations = _context.Stations.Where(g => g.GroupId == groupId).ToArray();
-                foreach (var station in stations)
-                {
-                    var connectors = _context.Connectors.Where(g => g.StationId == station.Id).ToArray();
-                    _context.Connectors.RemoveRange(connectors);
-                }
-                _context.Stations.RemoveRange(stations);
                 _context.Groups.Remove(group);
                 await _context.SaveChangesAsync();
             }
